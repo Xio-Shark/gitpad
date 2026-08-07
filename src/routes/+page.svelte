@@ -8,7 +8,7 @@
   import WelcomeView from '$lib/components/WelcomeView.svelte';
   import TabBar from '$lib/components/TabBar.svelte';
   import QuickOpen from '$lib/components/QuickOpen.svelte';
-  import { openWorkspace, workspace, openFile } from '$lib/state.svelte';
+  import { openWorkspace, workspace, openFile, activeTab, closeTabChecked } from '$lib/state.svelte';
 
   let loadError = $state<string | null>(null);
   let quickOpenOpen = $state(false);
@@ -25,6 +25,11 @@
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p' && !e.shiftKey) {
         e.preventDefault();
         quickOpenOpen = !quickOpenOpen;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        const tab = activeTab();
+        if (tab) closeTabChecked(tab.id);
       }
     });
   });

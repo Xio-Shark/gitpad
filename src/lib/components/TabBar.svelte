@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { activeTab, closeTab, tabs, toggleMarkdownPreview } from '$lib/state.svelte';
+  import { activeTab, closeTabChecked, tabs, toggleMarkdownPreview } from '$lib/state.svelte';
   import type { RendererKind } from '$lib/utils/filetype';
   import { isMarkdown } from '$lib/utils/filetype';
 
@@ -16,12 +16,6 @@
   const showPreviewToggle = $derived(
     current?.kind === 'text' && current.path !== '' && isMarkdown(current.path) && !current.commitOid
   );
-
-  function confirmClose(tabPath: string, dirty: boolean): void {
-    if (!dirty || confirm(`文件 ${tabPath.split('/').pop()} 有未保存修改，确定关闭？`)) {
-      closeTab(tabPath);
-    }
-  }
 </script>
 
 <div class="tabbar" role="tablist">
@@ -37,7 +31,7 @@
       onauxclick={(e) => {
         if (e.button === 1) {
           e.preventDefault();
-          confirmClose(tab.id, tab.dirty);
+          closeTabChecked(tab.id);
         }
       }}
       onkeydown={(e) => {
@@ -57,7 +51,7 @@
         title="关闭"
         onclick={(e) => {
           e.stopPropagation();
-          confirmClose(tab.id, tab.dirty);
+          closeTabChecked(tab.id);
         }}
       >×</button>
     </div>

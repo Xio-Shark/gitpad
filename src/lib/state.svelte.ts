@@ -165,6 +165,16 @@ export function closeTab(id: string): void {
   }
 }
 
+/** 关闭标签页：有未保存修改时询问（供标签 ×、中键、Cmd+W 共用） */
+export function closeTabChecked(id: string): void {
+  const tab = tabs.list.find((t) => t.id === id);
+  if (!tab) return;
+  const name = tab.path.split('/').pop() ?? tab.name;
+  if (!tab.dirty || confirm(`文件 ${name} 有未保存修改，确定关闭？`)) {
+    closeTab(id);
+  }
+}
+
 export function setTabContent(id: string, content: string, dirty: boolean): void {
   const tab = tabs.list.find((t) => t.id === id);
   if (!tab) return;
