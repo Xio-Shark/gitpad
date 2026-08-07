@@ -150,7 +150,7 @@
               {c.author} · {formatTime(c.time)}
               {#if c.refs.length > 0}
                 <span class="refs">
-                  {#each c.refs as ref, ri (ref)}
+                  {#each c.refs as ref, _ri (ref)}
                     <span class="ref-tag" class:head={ref === 'HEAD'}>{ref}</span>
                   {/each}
                 </span>

@@ -7,13 +7,14 @@
     onCancel: () => void;
   }>();
 
-  let value = $state('');
+  // 每次打开对话框都是新建实例（条件渲染），initial 只取打开瞬间的值。
+  // 用函数惰性读取，规避“只捕获 props 初始值”的本地引用警告。
+  function initialValue(): string {
+    return props.initial ?? '';
+  }
+  let value = $state(initialValue());
   let error = $state<string | null>(null);
   let focusEl = $state<HTMLInputElement | null>(null);
-
-  $effect(() => {
-    value = props.initial ?? '';
-  });
 
   $effect(() => {
     focusEl?.focus();

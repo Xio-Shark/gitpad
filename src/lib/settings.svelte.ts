@@ -56,8 +56,12 @@ function load(): Settings {
 
 export const settings = $state<Settings>(load());
 
-$effect(() => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+// 持久化：模块级 $effect 在 Svelte 5 会抛 effect_orphan，改用工场 $effect.root
+// 包裹，其内部 $effect 拥有独立的一级 effect 作用域，可安全追踪 settings 变更。
+$effect.root(() => {
+  $effect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  });
 });
 
 function hexToRgba(hex: string, alpha: number): string {
