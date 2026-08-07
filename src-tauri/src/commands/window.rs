@@ -49,3 +49,17 @@ pub async fn pick_folder(app: AppHandle) -> Result<(), AppError> {
     }
     Ok(())
 }
+
+/// 选择背景图片文件，返回绝对路径（取消返回 None）
+#[tauri::command]
+pub async fn pick_image(app: AppHandle) -> Result<Option<String>, AppError> {
+    let picked = app
+        .dialog()
+        .file()
+        .add_filter("图片", &["png", "jpg", "jpeg", "gif", "webp", "bmp", "avif"])
+        .blocking_pick_file();
+    Ok(picked
+        .map(|p| p.into_path().map_err(|e| AppError::Io(std::io::Error::other(e.to_string()))))
+        .transpose()?
+        .map(|p| p.to_string_lossy().into_owned()))
+}

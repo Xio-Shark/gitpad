@@ -157,7 +157,7 @@
     background: none;
     border: none;
     color: var(--text);
-    font-size: 14px;
+    font-size: var(--ui-font-size, 14px);
     cursor: pointer;
     text-align: left;
   }

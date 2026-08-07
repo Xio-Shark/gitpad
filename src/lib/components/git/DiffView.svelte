@@ -73,7 +73,7 @@
 <style>
   .diff-view {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: var(--ui-font-size, 14px);
     line-height: 1.45;
     overflow: auto;
     max-height: 100%;

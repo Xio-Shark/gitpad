@@ -89,3 +89,8 @@ export async function fsDelete(path: string, recursive: boolean): Promise<void> 
 export async function clipboardCopy(text: string): Promise<void> {
   return invoke<void>('clipboard_copy', { text });
 }
+
+/** 弹出系统文件选择器挑选图片，返回绝对路径；取消返回 null */
+export async function pickImage(): Promise<string | null> {
+  return invoke<string | null>('pick_image');
+}

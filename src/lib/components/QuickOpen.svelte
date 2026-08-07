@@ -118,7 +118,7 @@
   .qo-input {
     width: 100%;
     box-sizing: border-box;
-    font-size: 14px;
+    font-size: var(--ui-font-size, 14px);
     padding: 10px 12px;
     background: var(--bg);
     color: var(--text);
@@ -152,7 +152,7 @@
     color: var(--text-on-accent);
   }
   .qo-name {
-    font-size: 14px;
+    font-size: var(--ui-font-size, 14px);
     font-weight: 600;
     flex-shrink: 0;
   }

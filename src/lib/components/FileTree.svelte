@@ -7,6 +7,7 @@
   import { fsCreateFile, fsCreateDir, fsRename, fsDelete, clipboardCopy, isAppError } from '$lib/api';
   import { visibleRange } from '$lib/utils/windowing';
   import InputDialog from './InputDialog.svelte';
+  import SettingsPanel from './SettingsPanel.svelte';
 
   let props = $props<{
     root: TreeNode | null;
@@ -19,6 +20,7 @@
   let refreshError = $state<string | null>(null);
   let selectedPath = $state<string | null>(null);
   let copiedTip = $state<string | null>(null);
+  let settingsOpen = $state(false);
 
   const ROW_HEIGHT = 24;
 
@@ -178,6 +180,7 @@
         onclick={() => toggleSettings('showNodeModules')}
       >nm</button>
       <button title="刷新文件树" onclick={() => void refresh()}>↻</button>
+      <button class:active={settingsOpen} title="外观设置" onclick={() => (settingsOpen = true)}>⚙</button>
     </span>
   </div>
   {#if refreshError}
@@ -247,6 +250,9 @@
       onOk={(v) => void runDialog(v)}
       onCancel={() => (dialog = null)}
     />
+  {/if}
+  {#if settingsOpen}
+    <SettingsPanel onClose={() => (settingsOpen = false)} />
   {/if}
 </div>
 
@@ -341,7 +347,7 @@
     color: var(--text);
   }
   .name {
-    font-size: 14px;
+    font-size: var(--ui-font-size, 14px);
     overflow: hidden;
     text-overflow: ellipsis;
   }

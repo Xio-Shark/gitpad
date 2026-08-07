@@ -30,6 +30,7 @@ pub fn run() {
             commands::fs::fs_delete,
             commands::window::open_workspace,
             commands::window::pick_folder,
+            commands::window::pick_image,
             commands::git::git_status,
             commands::git::git_diff,
             commands::git::git_stage,

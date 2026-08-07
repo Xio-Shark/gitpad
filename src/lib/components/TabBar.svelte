@@ -89,7 +89,7 @@
     max-width: 200px;
     border-right: 1px solid var(--border);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--ui-font-size, 14px);
     color: var(--text-secondary);
     user-select: none;
     flex-shrink: 0;
@@ -120,7 +120,7 @@
     border: none;
     background: none;
     color: inherit;
-    font-size: 14px;
+    font-size: var(--ui-font-size, 14px);
     line-height: 1;
     padding: 0 2px;
     cursor: pointer;
