@@ -6,19 +6,23 @@ use crate::error::AppError;
 /// 文本/代码文件最大读取大小（10MB，保险丝）
 pub const MAX_TEXT_SIZE: u64 = 10 * 1024 * 1024;
 
-/// 读取文本文件：大小预检 + UTF-8 校验 + BOM 剥离
+/// 读取文本文件：大小预检 + UTF-8 校验 + BOM 剥离（使用默认上限）
 pub fn read_text(path: &Path) -> Result<String, AppError> {
+    read_text_with_limit(path, None)
+}
+
+/// 读取文本文件：大小预检 + UTF-8 校验 + BOM 剥离
+pub fn read_text_with_limit(path: &Path, max_size: Option<u64>) -> Result<String, AppError> {
     if !path.exists() {
         return Err(AppError::NotFound(path.display().to_string()));
     }
     if !path.is_file() {
         return Err(AppError::NotFile(path.display().to_string()));
     }
+    let limit = max_size.unwrap_or(MAX_TEXT_SIZE);
     let meta = fs::metadata(path)?;
-    if meta.len() > MAX_TEXT_SIZE {
-        return Err(AppError::FileTooLarge {
-            limit: MAX_TEXT_SIZE,
-        });
+    if meta.len() > limit {
+        return Err(AppError::FileTooLarge { limit });
     }
     let bytes = fs::read(path)?;
     // UTF-8 BOM 剥离

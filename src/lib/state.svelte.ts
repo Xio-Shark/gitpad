@@ -1,5 +1,6 @@
 import { fsListDir, type DirEntry } from './api';
 import { settings } from './settings.svelte';
+import { classify, type RendererKind } from './utils/filetype';
 
 export interface TreeNode {
   name: string;
@@ -11,10 +12,67 @@ export interface TreeNode {
   children: TreeNode[];
 }
 
+export interface Tab {
+  id: string;
+  path: string;
+  name: string;
+  kind: RendererKind;
+  dirty: boolean;
+  /** 文本内容缓存（dirty 对照与保存源） */
+  content: string | null;
+}
+
 export const workspace = $state<{ rootPath: string | null; root: TreeNode | null }>({
   rootPath: null,
   root: null,
 });
+
+export const tabs = $state<{ list: Tab[]; activeId: string | null }>({
+  list: [],
+  activeId: null,
+});
+
+export function activeTab(): Tab | null {
+  return tabs.list.find((t) => t.id === tabs.activeId) ?? null;
+}
+
+/** 打开文件到标签页：同路径去重，聚焦已有 */
+export function openFile(path: string): Tab {
+  const existing = tabs.list.find((t) => t.path === path);
+  if (existing) {
+    tabs.activeId = existing.id;
+    return existing;
+  }
+  const name = path.split('/').pop() ?? path;
+  const tab: Tab = {
+    id: path,
+    path,
+    name,
+    kind: classify(path),
+    dirty: false,
+    content: null,
+  };
+  tabs.list.push(tab);
+  tabs.activeId = tab.id;
+  return tab;
+}
+
+export function closeTab(id: string): void {
+  const idx = tabs.list.findIndex((t) => t.id === id);
+  if (idx === -1) return;
+  tabs.list.splice(idx, 1);
+  if (tabs.activeId === id) {
+    const next = tabs.list[Math.max(0, idx - 1)];
+    tabs.activeId = next ? next.id : null;
+  }
+}
+
+export function setTabContent(id: string, content: string, dirty: boolean): void {
+  const tab = tabs.list.find((t) => t.id === id);
+  if (!tab) return;
+  tab.content = content;
+  tab.dirty = dirty;
+}
 
 function toNode(e: DirEntry): TreeNode {
   return {

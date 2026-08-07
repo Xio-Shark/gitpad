@@ -6,10 +6,10 @@
   import EditorPane from '$lib/components/EditorPane.svelte';
   import GitPanel from '$lib/components/GitPanel.svelte';
   import WelcomeView from '$lib/components/WelcomeView.svelte';
-  import { openWorkspace, workspace } from '$lib/state.svelte';
+  import TabBar from '$lib/components/TabBar.svelte';
+  import { openWorkspace, workspace, openFile } from '$lib/state.svelte';
 
   let loadError = $state<string | null>(null);
-  let selectedFile = $state<string | null>(null);
 
   let workspacePath = $derived(page.url.searchParams.get('path'));
 
@@ -28,10 +28,13 @@
       {#if loadError}
         <div class="load-error">{loadError}</div>
       {:else}
-        <FileTree root={workspace.root} onFileClick={(p) => (selectedFile = p)} />
+        <FileTree root={workspace.root} onFileClick={(p) => openFile(p)} />
       {/if}
     </aside>
-    <main class="editor"><EditorPane filePath={selectedFile} /></main>
+    <main class="editor">
+      <TabBar />
+      <div class="editor-body"><EditorPane /></div>
+    </main>
     <aside class="git"><GitPanel /></aside>
   </div>
 {:else}
@@ -54,6 +57,12 @@
   .editor {
     min-width: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .editor-body {
+    flex: 1;
+    min-height: 0;
   }
   .git {
     min-width: 0;

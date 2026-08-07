@@ -1,31 +1,55 @@
 <script lang="ts">
-  let props = $props<{ filePath: string | null }>();
+  import { activeTab } from '$lib/state.svelte';
+  import TextRenderer from './Editor/TextRenderer.svelte';
+  import ImageRenderer from './Editor/ImageRenderer.svelte';
+  import CsvRenderer from './Editor/CsvRenderer.svelte';
+
+  let tab = $derived(activeTab());
 </script>
 
 <div class="editor-pane">
-  {#if props.filePath}
-    <div class="placeholder">
-      <div class="placeholder-title">文件已选中</div>
-      <div class="placeholder-path">{props.filePath}</div>
-      <div class="placeholder-note">编辑功能将在 M2 接入（CodeMirror）</div>
-    </div>
-  {:else}
+  {#if !tab}
     <div class="placeholder">
       <div class="placeholder-title">GitPad</div>
       <div class="placeholder-note">从左侧文件树选择文件</div>
     </div>
+  {:else}
+    {#key tab.id}
+      {#if tab.kind === 'image'}
+        <ImageRenderer tab={tab} />
+      {:else if tab.kind === 'csv'}
+        <CsvRenderer tab={tab} />
+      {:else if tab.kind === 'text'}
+        <TextRenderer tab={tab} />
+      {:else if tab.kind === 'pdf'}
+        <div class="placeholder">
+          <div class="placeholder-title">PDF 预览</div>
+          <div class="placeholder-note">将在 M4 实现</div>
+        </div>
+      {:else}
+        <div class="placeholder">
+          <div class="placeholder-title">不支持的格式</div>
+          <div class="placeholder-note">{tab.name}</div>
+        </div>
+      {/if}
+    {/key}
   {/if}
 </div>
 
 <style>
   .editor-pane {
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     color: var(--text-secondary);
   }
@@ -34,13 +58,6 @@
     font-weight: 600;
     margin-bottom: 8px;
     color: var(--text);
-  }
-  .placeholder-path {
-    font-size: 13px;
-    font-family: var(--font-mono);
-    word-break: break-all;
-    max-width: 500px;
-    margin-bottom: 8px;
   }
   .placeholder-note {
     font-size: 12px;

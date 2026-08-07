@@ -24,11 +24,14 @@ pub fn fs_list_dir(params: ListDirParams) -> Result<Vec<tree::DirEntry>, AppErro
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct ReadFileParams {
     pub path: PathBuf,
+    /// 覆盖默认大小上限（CSV 等格式需要更大上限）
+    #[serde(default)]
+    pub max_size: Option<u64>,
 }
 
 #[tauri::command]
 pub fn fs_read_file(params: ReadFileParams) -> Result<String, AppError> {
-    text::read_text(&params.path)
+    text::read_text_with_limit(&params.path, params.max_size)
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]

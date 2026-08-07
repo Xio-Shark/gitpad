@@ -29,3 +29,18 @@ export async function fsListDir(
     params: { path, show_hidden: opts.showHidden, show_node_modules: opts.showNodeModules },
   });
 }
+
+/** 文本读取上限（与 Rust 侧 MAX_TEXT_SIZE 一致） */
+export const MAX_TEXT_SIZE = 10 * 1024 * 1024;
+/** CSV 表格视图上限（超过则降级只读文本） */
+export const MAX_CSV_TABLE_SIZE = 20 * 1024 * 1024;
+
+export async function fsReadFile(path: string, maxSize?: number): Promise<string> {
+  return invoke<string>('fs_read_file', {
+    params: maxSize ? { path, max_size: maxSize } : { path },
+  });
+}
+
+export async function fsWriteFile(path: string, content: string): Promise<void> {
+  return invoke<void>('fs_write_file', { params: { path, content } });
+}
