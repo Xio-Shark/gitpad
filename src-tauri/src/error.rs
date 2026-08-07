@@ -8,6 +8,12 @@ pub enum AppError {
     NotFound(String),
     #[error("not a directory: {0}")]
     NotDirectory(String),
+    #[error("not a file: {0}")]
+    NotFile(String),
+    #[error("file too large, limit {limit} bytes")]
+    FileTooLarge { limit: u64 },
+    #[error("encoding not supported: {path}")]
+    EncodingNotSupported { path: String },
 }
 
 impl AppError {
@@ -16,6 +22,9 @@ impl AppError {
             AppError::Io(_) => "io",
             AppError::NotFound(_) => "not_found",
             AppError::NotDirectory(_) => "not_directory",
+            AppError::NotFile(_) => "not_file",
+            AppError::FileTooLarge { .. } => "file_too_large",
+            AppError::EncodingNotSupported { .. } => "encoding_not_supported",
         }
     }
 }

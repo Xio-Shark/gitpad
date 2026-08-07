@@ -19,6 +19,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             commands::fs::fs_list_dir,
+            commands::fs::fs_read_file,
+            commands::fs::fs_write_file,
             commands::window::open_workspace,
             commands::window::pick_folder
         ])
