@@ -22,6 +22,8 @@ export interface Tab {
   content: string | null;
   /** git diff 预览所属工作区 */
   workspace?: string;
+  /** 提交 diff 预览的提交 oid（存在时为历史提交查看模式） */
+  commitOid?: string;
 }
 
 export const workspace = $state<{ rootPath: string | null; root: TreeNode | null }>({
@@ -81,6 +83,29 @@ export function openGitDiff(path: string, workspacePath: string): Tab {
   return tab;
 }
 
+/** 打开提交历史中某个提交的 diff 预览标签页 */
+export function openCommitDiff(workspacePath: string, oid: string, label: string): Tab {
+  const existing = tabs.list.find(
+    (t) => t.kind === 'gitdiff' && t.commitOid === oid && t.workspace === workspacePath
+  );
+  if (existing) {
+    tabs.activeId = existing.id;
+    return existing;
+  }
+  const tab: Tab = {
+    id: `gitdiff:${workspacePath}:commit:${oid}`,
+    path: oid,
+    name: `diff: ${label}`,
+    kind: 'gitdiff',
+    dirty: false,
+    content: null,
+    workspace: workspacePath,
+    commitOid: oid,
+  };
+  tabs.list.push(tab);
+  tabs.activeId = tab.id;
+  return tab;
+}
 /** git 变更计数：任何 stage/unstage/commit 操作后自增，供面板自动刷新 */
 export const gitEvents = $state<{ tick: number }>({ tick: 0 });
 

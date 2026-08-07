@@ -20,8 +20,9 @@ export const LANE_COLORS = [
 ];
 
 /**
- * 简单 lane 分配：按 topo 序（新→旧）遍历，
- * 每个 commit 占用（或复用）一列；第一父继承本列，其余父占用空闲列。
+ * 经典 lane 分配（类似 git 官方图形）：
+ * 按 topo 序（新→旧）遍历，每个提交占用/复用一列；
+ * 第一父继承本列，其余父占空闲列；同一提交被多个子引用时清除所有残留位置。
  */
 export function layoutGraph(commits: CommitInfo[]): GraphRow[] {
   const lanes: (string | null)[] = [];
@@ -36,11 +37,15 @@ export function layoutGraph(commits: CommitInfo[]): GraphRow[] {
         lane = lanes.length - 1;
       }
     }
+    // 清除该提交在 lanes 里的所有残留位置（多个子引用同一父时）
+    for (let i = 0; i < lanes.length; i++) {
+      if (lanes[i] === c.oid) lanes[i] = null;
+    }
+
     rows.push({ commit: c, lane });
 
     const parents = c.parents;
     if (parents.length === 0) {
-      lanes[lane] = null;
       continue;
     }
     lanes[lane] = parents[0];
@@ -87,5 +92,13 @@ export function buildLinks(
 export function formatTime(seconds: number): string {
   const d = new Date(seconds * 1000);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+  const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (sameDay) return `今天 ${hm}`;
+  if (isYesterday) return `昨天 ${hm}`;
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${hm}`;
 }

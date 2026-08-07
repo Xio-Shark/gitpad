@@ -1,7 +1,7 @@
 <script lang="ts">
   import { bumpGitTick, gitEvents, type Tab } from '$lib/state.svelte';
   import type { DiffFile } from '$lib/git';
-  import { gitDiff, gitStage, gitUnstage } from '$lib/git';
+  import { gitCommitDiff, gitDiff, gitStage, gitStatus, gitUnstage } from '$lib/git';
   import { isAppError } from '$lib/api';
   import DiffView from '../git/DiffView.svelte';
 
@@ -14,9 +14,11 @@
   let selStaged = $state<boolean[]>([]);
   let selUnstaged = $state<boolean[]>([]);
   let untracked = $state(false);
+  let commitDiff = $state<DiffFile[]>([]);
 
   const ws = $derived(props.tab.workspace ?? '');
   const path = $derived(props.tab.path);
+  const isCommit = $derived(!!props.tab.commitOid);
 
   // 首次挂载与面板里的暂存/提交操作（tick 变化）后自动刷新
   $effect(() => {
@@ -27,10 +29,14 @@
   async function load() {
     error = null;
     try {
+      if (isCommit) {
+        commitDiff = await gitCommitDiff(ws, props.tab.commitOid!);
+        return;
+      }
       const [sd, ud, st] = await Promise.all([
         gitDiff(ws, path, true),
         gitDiff(ws, path, false),
-        import('$lib/git').then((m) => m.gitStatus(ws)),
+        gitStatus(ws),
       ]);
       untracked = st.changes.some((c) => c.path === path && c.untracked);
       stagedDiff = sd;
@@ -80,43 +86,48 @@
 </script>
 
 <div class="git-diff-renderer">
-  <div class="toolbar">
-    <span class="path" title={path}>{path}</span>
-    {#if untracked}
-      <span class="tag">未跟踪</span>
-    {/if}
-    <div class="actions">
-      <button disabled={busy || countHunks(stagedDiff) === 0} onclick={() => void doUnstage()}>撤销暂存</button>
-      <button disabled={busy || countHunks(unstagedDiff) === 0} onclick={() => void doStage()}>暂存</button>
-    </div>
-  </div>
-  {#if error}
-    <div class="error">{error}</div>
-  {/if}
-  {#if untracked && countHunks(stagedDiff) === 0 && countHunks(unstagedDiff) === 0}
-    <div class="empty-note">未跟踪文件，勾选后在 Git 面板提交，或先暂存查看差异</div>
-  {:else if countHunks(stagedDiff) === 0 && countHunks(unstagedDiff) === 0}
-    <div class="empty-note">该文件当前没有变更</div>
+  {#if isCommit}
+    <div class="label">提交 {props.tab.commitOid?.slice(0, 8)}</div>
+    <DiffView files={commitDiff} readonly />
   {:else}
-    {#if countHunks(stagedDiff) > 0}
-      <div class="label">已暂存变更</div>
-      <DiffView
-        files={stagedDiff}
-        selection={{
-          selected: selStaged,
-          onToggle: (i) => (selStaged[i] = !selStaged[i]),
-        }}
-      />
+    <div class="toolbar">
+      <span class="path" title={path}>{path}</span>
+      {#if untracked}
+        <span class="tag">未跟踪</span>
+      {/if}
+      <div class="actions">
+        <button disabled={busy || countHunks(stagedDiff) === 0} onclick={() => void doUnstage()}>撤销暂存</button>
+        <button disabled={busy || countHunks(unstagedDiff) === 0} onclick={() => void doStage()}>暂存</button>
+      </div>
+    </div>
+    {#if error}
+      <div class="error">{error}</div>
     {/if}
-    {#if countHunks(unstagedDiff) > 0}
-      <div class="label">未暂存变更</div>
-      <DiffView
-        files={unstagedDiff}
-        selection={{
-          selected: selUnstaged,
-          onToggle: (i) => (selUnstaged[i] = !selUnstaged[i]),
-        }}
-      />
+    {#if untracked && countHunks(stagedDiff) === 0 && countHunks(unstagedDiff) === 0}
+      <div class="empty-note">未跟踪文件，勾选后在 Git 面板提交，或先暂存查看差异</div>
+    {:else if countHunks(stagedDiff) === 0 && countHunks(unstagedDiff) === 0}
+      <div class="empty-note">该文件当前没有变更</div>
+    {:else}
+      {#if countHunks(stagedDiff) > 0}
+        <div class="label">已暂存变更</div>
+        <DiffView
+          files={stagedDiff}
+          selection={{
+            selected: selStaged,
+            onToggle: (i) => (selStaged[i] = !selStaged[i]),
+          }}
+        />
+      {/if}
+      {#if countHunks(unstagedDiff) > 0}
+        <div class="label">未暂存变更</div>
+        <DiffView
+          files={unstagedDiff}
+          selection={{
+            selected: selUnstaged,
+            onToggle: (i) => (selUnstaged[i] = !selUnstaged[i]),
+          }}
+        />
+      {/if}
     {/if}
   {/if}
 </div>
