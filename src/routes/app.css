@@ -130,3 +130,26 @@ button {
   border-top: 1px solid var(--border);
   margin: 16px 0;
 }
+
+/* PDF 文本层（pdf.ts 动态创建，须为全局；最小集取自 pdf_viewer.css） */
+.textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  caret-color: CanvasText;
+}
+.textLayer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+.textLayer .search-hit {
+  background: rgba(255, 200, 0, 0.4);
+  border-radius: 2px;
+}

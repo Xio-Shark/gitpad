@@ -40,7 +40,8 @@
     "katex": "^0.18.1",
     "markdown-it": "^15.0.0",
     "mermaid": "^11.16.1",
-    "papaparse": "^5.5.4"
+    "papaparse": "^5.5.4",
+    "pdfjs-dist": "^6.2.108"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

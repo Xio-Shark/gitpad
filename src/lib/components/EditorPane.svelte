@@ -5,6 +5,7 @@
   import MarkdownRenderer from './Editor/MarkdownRenderer.svelte';
   import ImageRenderer from './Editor/ImageRenderer.svelte';
   import CsvRenderer from './Editor/CsvRenderer.svelte';
+  import PdfRenderer from './Editor/PdfRenderer.svelte';
 
   let tab = $derived(activeTab());
 </script>
@@ -26,10 +27,7 @@
       {:else if tab.kind === 'text'}
         <TextRenderer tab={tab} />
       {:else if tab.kind === 'pdf'}
-        <div class="placeholder">
-          <div class="placeholder-title">PDF 预览</div>
-          <div class="placeholder-note">将在 M4 实现</div>
-        </div>
+        <PdfRenderer tab={tab} />
       {:else}
         <div class="placeholder">
           <div class="placeholder-title">不支持的格式</div>
