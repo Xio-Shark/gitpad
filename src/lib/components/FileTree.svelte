@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { TreeNode } from '$lib/state.svelte';
   import { toggleNode, refreshNode, invalidateQuickOpen, openFile } from '$lib/state.svelte';
   import { settings } from '$lib/settings.svelte';
@@ -16,8 +17,32 @@
   let scrollTop = $state(0);
   let viewportHeight = $state(600);
   let refreshError = $state<string | null>(null);
+  let selectedPath = $state<string | null>(null);
+  let copiedTip = $state<string | null>(null);
 
   const ROW_HEIGHT = 24;
+
+  // Option+Cmd+C 复制选中节点绝对路径（无选中时复制工作区根路径）
+  onMount(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey && e.altKey && e.key.toLowerCase() === 'c') {
+        const target = selectedPath ?? props.root?.path;
+        if (!target) return;
+        void navigator.clipboard.writeText(target).then(() => {
+          copiedTip = `已复制路径：${target}`;
+          setTimeout(() => (copiedTip = null), 2500);
+        });
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
+  function selectAndOpen(node: TreeNode) {
+    selectedPath = node.path;
+    if (node.isDir) toggleNode(node);
+    else props.onFileClick(node.path);
+  }
 
   interface FlatRow {
     node: TreeNode;
@@ -157,6 +182,9 @@
   {#if refreshError}
     <div class="refresh-error">{refreshError}</div>
   {/if}
+  {#if copiedTip}
+    <div class="copy-tip">{copiedTip}</div>
+  {/if}
   <div
     class="tree-scroll"
     role="tree"
@@ -174,22 +202,22 @@
           class="tree-row"
           style="top: {(range.start + i) * ROW_HEIGHT}px; padding-left: {row.depth * 14 + 6}px;"
           class:dir={row.node.isDir}
+          class:selected={row.node.path === selectedPath}
           role="treeitem"
           aria-label={row.node.name}
-          aria-selected="false"
+          aria-selected={row.node.path === selectedPath}
           tabindex="-1"
-          oncontextmenu={(e) => showMenu(e, row.node)}
+          oncontextmenu={(e) => {
+            showMenu(e, row.node);
+            selectedPath = row.node.path;
+          }}
           onkeydown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              if (row.node.isDir) toggleNode(row.node);
-              else props.onFileClick(row.node.path);
+              selectAndOpen(row.node);
             }
           }}
-          onclick={() => {
-            if (row.node.isDir) toggleNode(row.node);
-            else props.onFileClick(row.node.path);
-          }}
+          onclick={() => selectAndOpen(row.node)}
           title={row.node.path}
         >
           <span class="chevron" class:open={row.node.expanded}>{row.node.isDir ? (row.node.expanded ? '▾' : '▸') : ''}</span>
@@ -273,6 +301,19 @@
     color: var(--danger);
     border-top: 1px solid var(--border);
     flex-shrink: 0;
+  }
+  .copy-tip {
+    padding: 4px 8px;
+    font-size: 11px;
+    color: #4aae6b;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tree-row.selected {
+    background: rgba(77, 170, 252, 0.18);
   }
   .tree-row {
     position: absolute;

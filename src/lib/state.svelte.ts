@@ -24,6 +24,8 @@ export interface Tab {
   workspace?: string;
   /** 提交 diff 预览的提交 oid（存在时为历史提交查看模式） */
   commitOid?: string;
+  /** Markdown 预览模式（眼睛按钮切换） */
+  preview?: boolean;
 }
 
 export const workspace = $state<{ rootPath: string | null; root: TreeNode | null }>({
@@ -55,10 +57,16 @@ export function openFile(path: string): Tab {
     kind: classify(path),
     dirty: false,
     content: null,
+    preview: false,
   };
   tabs.list.push(tab);
   tabs.activeId = tab.id;
   return tab;
+}
+
+/** 切换 Markdown 预览模式 */
+export function toggleMarkdownPreview(tab: Tab): void {
+  tab.preview = !tab.preview;
 }
 
 /** 在工作区打开某个文件的 git diff 预览标签页（同名文件去重） */

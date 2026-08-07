@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { closeTab, tabs } from '$lib/state.svelte';
+  import { activeTab, closeTab, tabs, toggleMarkdownPreview } from '$lib/state.svelte';
   import type { RendererKind } from '$lib/utils/filetype';
+  import { isMarkdown } from '$lib/utils/filetype';
 
   const KIND_ICON: Record<RendererKind, string> = {
     text: '📄',
@@ -10,6 +11,11 @@
     gitdiff: '🔀',
     unknown: '❔',
   };
+
+  const current = $derived(activeTab());
+  const showPreviewToggle = $derived(
+    current?.kind === 'text' && current.path !== '' && isMarkdown(current.path) && !current.commitOid
+  );
 
   function confirmClose(tabPath: string, dirty: boolean): void {
     if (!dirty || confirm(`文件 ${tabPath.split('/').pop()} 有未保存修改，确定关闭？`)) {
@@ -58,6 +64,14 @@
   {/each}
   {#if tabs.list.length === 0}
     <div class="tabbar-empty">无打开的标签页</div>
+  {/if}
+  {#if showPreviewToggle && current}
+    <button
+      class="preview-toggle"
+      class:active={current.preview ?? false}
+      title={current.preview ? '退出预览' : '预览'}
+      onclick={() => toggleMarkdownPreview(current)}
+    >👁</button>
   {/if}
 </div>
 
@@ -126,5 +140,26 @@
     padding: 8px 10px;
     font-size: 12px;
     color: var(--text-secondary);
+  }
+  .preview-toggle {
+    margin-left: auto;
+    margin-right: 6px;
+    align-self: center;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    padding: 1px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .preview-toggle:hover {
+    color: var(--text);
+  }
+  .preview-toggle.active {
+    background: var(--accent);
+    color: var(--text-on-accent);
+    border-color: var(--accent);
   }
 </style>

@@ -92,13 +92,15 @@
       {#if saving}<span class="saving">保存中…</span>{/if}
     </div>
   {:else}
-    <div class="split">
-      <div class="cm-host" bind:this={container}></div>
-      <div class="divider"></div>
-      <div class="preview-host markdown-body" bind:this={previewHost}>
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -- 本地 markdown 渲染预览（设计决策：不 sanitize，见 M3 design.md） -->
-        {@html previewHtml}
-      </div>
+    <div class="md-body">
+      {#if props.tab.preview}
+        <div class="preview-host markdown-body" bind:this={previewHost}>
+          <!-- eslint-disable-next-line svelte/no-at-html-tags -- 本地 markdown 渲染预览（设计决策：不 sanitize，见 M3 design.md） -->
+          {@html previewHtml}
+        </div>
+      {:else}
+        <div class="cm-host" bind:this={container}></div>
+      {/if}
     </div>
     {#if saving}
       <div class="save-indicator">保存中…</div>
@@ -112,7 +114,7 @@
     position: relative;
     overflow: hidden;
   }
-  .split {
+  .md-body {
     display: flex;
     height: 100%;
   }
@@ -120,11 +122,6 @@
     flex: 1;
     min-width: 0;
     overflow: hidden;
-  }
-  .divider {
-    width: 1px;
-    background: var(--border);
-    flex-shrink: 0;
   }
   .preview-host {
     flex: 1;
