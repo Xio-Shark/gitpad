@@ -25,7 +25,7 @@ body {
 
 body {
   font-family: var(--ui-font-family, 'Maple Mono NF', 'Maple Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
-  font-size: var(--ui-font-size, 14px);
+  font-size: var(--ui-font-size, 16px);
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
@@ -38,7 +38,7 @@ button {
 
 /* Markdown 预览区样式（作用于 {@html} 动态内容，须为全局） */
 .markdown-body {
-  font-size: var(--ui-font-size, 14px);
+  font-size: var(--ui-font-size, 16px);
   line-height: 1.6;
   color: var(--text);
 }

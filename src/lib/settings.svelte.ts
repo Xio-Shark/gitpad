@@ -24,7 +24,7 @@ const DEFAULTS: Settings = {
   showNodeModules: false,
   appearance: {
     fontFamily: '',
-    fontSize: 14,
+    fontSize: 16,
     bgColor: '#1e1e1e',
     bgImage: '',
     bgOpacity: 0.85,
@@ -43,7 +43,7 @@ function load(): Settings {
       showNodeModules: parsed.showNodeModules ?? DEFAULTS.showNodeModules,
       appearance: {
         fontFamily: parsed.appearance?.fontFamily ?? '',
-        fontSize: parsed.appearance?.fontSize ?? 14,
+        fontSize: parsed.appearance?.fontSize ?? 16,
         bgColor: parsed.appearance?.bgColor ?? '#1e1e1e',
         bgImage: parsed.appearance?.bgImage ?? '',
         bgOpacity: parsed.appearance?.bgOpacity ?? 0.85,
