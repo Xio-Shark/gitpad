@@ -68,7 +68,6 @@
           class="commit-row"
           class:active={selected?.oid === c.oid}
           onclick={() => void openCommit(c)}
-          style="top: {i * ROW_HEIGHT}px"
         >
           <span class="graph-cell" style="width: {(maxLane + 1) * LANE_WIDTH + 8}px">
             <svg width="{(maxLane + 1) * LANE_WIDTH + 8}" height={ROW_HEIGHT}>
@@ -126,12 +125,8 @@
     flex-shrink: 0;
     overflow: auto;
     max-height: 46%;
-    position: relative;
   }
   .commit-row {
-    position: absolute;
-    left: 0;
-    right: 0;
     height: 26px;
     display: flex;
     align-items: center;
@@ -141,6 +136,7 @@
     cursor: pointer;
     padding: 0 6px 0 0;
     text-align: left;
+    width: 100%;
   }
   .commit-row:hover {
     background: var(--hover);

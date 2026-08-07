@@ -2,7 +2,7 @@
   import type { Change, StatusData } from '$lib/git';
   import { gitCommit, gitStatus } from '$lib/git';
   import { isAppError } from '$lib/api';
-  import { bumpGitTick, gitEvents, openGitDiff } from '$lib/state.svelte';
+  import { bumpGitTick, gitEvents, openFile, openGitDiff } from '$lib/state.svelte';
 
   let props = $props<{
     workspace: string;
@@ -96,7 +96,7 @@
           <div class="empty-note">无</div>
         {:else}
           {#each untracked as c (c.path)}
-            <button class="file-row" onclick={() => openGitDiff(c.path, props.workspace)}>
+            <button class="file-row" onclick={() => openFile(c.path)}>
               <span class="badge badge-untracked">{statusBadge(c)}</span>
               <span class="fname" title={c.path}>{c.path}</span>
             </button>

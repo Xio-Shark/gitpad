@@ -73,7 +73,7 @@
 <style>
   .diff-view {
     font-family: var(--font-mono);
-    font-size: 11.5px;
+    font-size: 13px;
     line-height: 1.45;
     overflow: auto;
     max-height: 100%;
@@ -147,14 +147,14 @@
     word-break: break-all;
   }
   .dline .ln {
-    width: 32px;
+    width: 34px;
     flex-shrink: 0;
     text-align: right;
     padding-right: 6px;
     color: var(--text-secondary);
     opacity: 0.6;
     user-select: none;
-    font-size: 10px;
+    font-size: 11px;
   }
   .dline .txt {
     flex: 1;
