@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use ignore::WalkBuilder;
 use crate::error::AppError;
+use ignore::WalkBuilder;
 
 /// 单个目录条目（过滤后的可见子项）
 #[derive(Debug, Clone, serde::Serialize)]
@@ -342,8 +342,7 @@ mod walk_tests {
 
     #[test]
     fn walk_collects_files_and_respects_filters() {
-        let root =
-            std::env::temp_dir().join(format!("gitpad-walk-test-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("gitpad-walk-test-{}", std::process::id()));
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(root.join("sub")).unwrap();
         fs::write(root.join("a.txt"), "a").unwrap();
@@ -352,22 +351,28 @@ mod walk_tests {
         fs::create_dir_all(root.join("node_modules/pkg")).unwrap();
         fs::write(root.join("node_modules/pkg/index.js"), "x").unwrap();
 
-        let res = walk(
-            &root,
-            &ListOptions::default(),
-            100,
-        )
-        .unwrap();
+        let res = walk(&root, &ListOptions::default(), 100).unwrap();
         assert!(!res.truncated);
         let rel: Vec<String> = res
             .files
             .iter()
-            .map(|f| f.path.strip_prefix(root.to_str().unwrap()).unwrap().to_string())
+            .map(|f| {
+                f.path
+                    .strip_prefix(root.to_str().unwrap())
+                    .unwrap()
+                    .to_string()
+            })
             .collect();
         assert!(rel.contains(&"/a.txt".to_string()));
         assert!(rel.contains(&"/sub/b.txt".to_string()));
-        assert!(!rel.iter().any(|p| p.contains(".hidden")), "隐藏文件应被过滤: {rel:?}");
-        assert!(!rel.iter().any(|p| p.contains("node_modules")), "node_modules 应被过滤: {rel:?}");
+        assert!(
+            !rel.iter().any(|p| p.contains(".hidden")),
+            "隐藏文件应被过滤: {rel:?}"
+        );
+        assert!(
+            !rel.iter().any(|p| p.contains("node_modules")),
+            "node_modules 应被过滤: {rel:?}"
+        );
 
         // 打开开关后可见
         let res = walk(
@@ -382,7 +387,12 @@ mod walk_tests {
         let rel: Vec<String> = res
             .files
             .iter()
-            .map(|f| f.path.strip_prefix(root.to_str().unwrap()).unwrap().to_string())
+            .map(|f| {
+                f.path
+                    .strip_prefix(root.to_str().unwrap())
+                    .unwrap()
+                    .to_string()
+            })
             .collect();
         assert!(rel.iter().any(|p| p.contains(".hidden")));
         assert!(rel.iter().any(|p| p.contains("node_modules")));

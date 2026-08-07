@@ -1,18 +1,22 @@
 <script lang="ts">
   import { ensureQuickOpen, openFile, quickOpen } from '$lib/state.svelte';
-  import type { WalkFile } from '$lib/api';
+  import { isAppError, type WalkFile } from '$lib/api';
 
   let props = $props<{ open: boolean; onClose: () => void }>();
 
   let query = $state('');
   let cursor = $state(0);
+  let error = $state<string | null>(null);
   let inputEl = $state<HTMLInputElement | null>(null);
 
   $effect(() => {
     if (props.open) {
       query = '';
       cursor = 0;
-      void ensureQuickOpen();
+      error = null;
+      ensureQuickOpen().catch((e) => {
+        error = isAppError(e) ? e.message : String(e);
+      });
       inputEl?.focus();
     }
   });
@@ -77,18 +81,22 @@
       {#if quickOpen.truncated}
         <div class="qo-truncated">文件过多，已显示部分结果</div>
       {/if}
-      <div class="qo-list">
-        {#if results.length === 0}
-          <div class="qo-empty">没有匹配的文件</div>
-        {:else}
-          {#each results as f, i (f.path)}
-            <button class="qo-item" class:active={i === cursor} onclick={() => pick(f)}>
-              <span class="qo-name">{f.name}</span>
-              <span class="qo-path">{f.path}</span>
-            </button>
-          {/each}
-        {/if}
-      </div>
+      {#if error}
+        <div class="qo-error">扫描失败：{error}</div>
+      {:else}
+        <div class="qo-list">
+          {#if results.length === 0}
+            <div class="qo-empty">没有匹配的文件</div>
+          {:else}
+            {#each results as f, i (f.path)}
+              <button class="qo-item" class:active={i === cursor} onclick={() => pick(f)}>
+                <span class="qo-name">{f.name}</span>
+                <span class="qo-path">{f.path}</span>
+              </button>
+            {/each}
+          {/if}
+        </div>
+      {/if}
     </div>
   </div>
 {/if}
@@ -130,6 +138,12 @@
     padding: 4px 12px;
     font-size: 11px;
     color: #d29922;
+  }
+  .qo-error {
+    padding: 16px 12px;
+    font-size: 12px;
+    color: var(--danger);
+    text-align: center;
   }
   .qo-list {
     max-height: 320px;

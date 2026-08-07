@@ -196,6 +196,7 @@ function toNode(e: DirEntry): TreeNode {
 
 /** 打开 Workspace：设置根并加载第一层 */
 export async function openWorkspace(path: string): Promise<void> {
+  invalidateQuickOpen();
   workspace.rootPath = path;
   const entries = await fsListDir(path, settings);
   workspace.root = {
