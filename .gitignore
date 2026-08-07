@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Trellis runtime state (spec/tasks 保留提交，运行时状态不提交)
+.trellis/.developer
+.trellis/.current-task
+.trellis/.runtime/
+.trellis/.agents/
+.trellis/.agent-log
+.trellis/.session-id
+.trellis/.ralph-state.json
+.trellis/.plan-log
+.trellis/.backup-*/
