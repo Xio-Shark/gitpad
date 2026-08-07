@@ -5,4 +5,4 @@
 {"file": ".trellis/spec/backend/error-handling.md", "reason": "AppError::FileTooLarge 与错误传播"}
 {"file": ".trellis/spec/backend/directory-structure.md", "reason": "fs_read_file/fs_write_file 命令与领域层落位"}
 {"file": ".trellis/tasks/08-07-mvp/prd.md", "reason": "父任务文件格式支持需求"}
-{"file": ".trellis/tasks/08-07-m1-skeleton/design.md", "reason": "M1 布局与 EditorPane 占位的接入点"}
+{"file": ".trellis/tasks/archive/2026-08/08-07-m1-skeleton/design.md", "reason": "M1 布局与 EditorPane 占位的接入点"}
