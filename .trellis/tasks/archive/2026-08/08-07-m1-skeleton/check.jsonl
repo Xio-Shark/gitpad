@@ -1,4 +1,0 @@
-{"file": ".trellis/tasks/08-07-m1-skeleton/prd.md", "reason": "验收标准核对源"}
-{"file": ".trellis/tasks/08-07-m1-skeleton/design.md", "reason": "设计决策核对源（过滤语义/窗口模型）"}
-{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Rust 代码审查标准"}
-{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端代码审查标准"}

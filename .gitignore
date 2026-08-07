@@ -22,13 +22,5 @@ src-tauri/gen/
 # Logs
 *.log
 
-# Trellis runtime state (spec/tasks 保留提交，运行时状态不提交)
-.trellis/.developer
-.trellis/.current-task
-.trellis/.runtime/
-.trellis/.agents/
-.trellis/.agent-log
-.trellis/.session-id
-.trellis/.ralph-state.json
-.trellis/.plan-log
-.trellis/.backup-*/
+# Trellis 本地开发规范（不上传公开仓库）
+.trellis/
