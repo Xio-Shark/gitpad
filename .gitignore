@@ -24,3 +24,8 @@ src-tauri/gen/
 
 # Trellis 本地开发规范（不上传公开仓库）
 .trellis/
+
+# Trellis / opencode 配置
+.trellis/
+.opencode/
+.lwc/
