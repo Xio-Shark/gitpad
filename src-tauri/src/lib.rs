@@ -17,7 +17,11 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![commands::fs::fs_list_dir])
+        .invoke_handler(tauri::generate_handler![
+            commands::fs::fs_list_dir,
+            commands::window::open_workspace,
+            commands::window::pick_folder
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -234,4 +234,23 @@ mod tests {
             Err(AppError::NotDirectory(_))
         ));
     }
+
+    #[test]
+    fn listing_500_entries_is_fast() {
+        // 单层 500 项（树展开场景的上限量级）应在毫秒级完成
+        let root = setup("perf");
+        let sub = root.join("big");
+        fs::create_dir_all(&sub).unwrap();
+        for i in 0..500 {
+            fs::write(sub.join(format!("f{i}.txt")), "x").unwrap();
+        }
+        let start = std::time::Instant::now();
+        let entries = list(&sub, &ListOptions::default()).unwrap();
+        let elapsed = start.elapsed();
+        assert_eq!(entries.len(), 500);
+        assert!(
+            elapsed.as_millis() < 500,
+            "500 项列出耗时 {elapsed:?}，超过 500ms"
+        );
+    }
 }
