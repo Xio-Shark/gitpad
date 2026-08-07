@@ -7,6 +7,7 @@
     image: '🖼️',
     csv: '📊',
     pdf: '📕',
+    gitdiff: '🔀',
     unknown: '❔',
   };
 

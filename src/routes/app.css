@@ -8,7 +8,7 @@
   --accent: #0e639c;
   --text-on-accent: #ffffff;
   --danger: #f14c4c;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-mono: 'Maple Mono NF', 'Maple Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 * {

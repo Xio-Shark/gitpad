@@ -14,6 +14,16 @@ pub enum AppError {
     FileTooLarge { limit: u64 },
     #[error("encoding not supported: {path}")]
     EncodingNotSupported { path: String },
+    #[error("git error: {0}")]
+    Git(String),
+    #[error("not a git repository: {0}")]
+    NotGitRepository(String),
+}
+
+impl From<git2::Error> for AppError {
+    fn from(e: git2::Error) -> Self {
+        AppError::Git(e.message().to_string())
+    }
 }
 
 impl AppError {
@@ -25,6 +35,8 @@ impl AppError {
             AppError::NotFile(_) => "not_file",
             AppError::FileTooLarge { .. } => "file_too_large",
             AppError::EncodingNotSupported { .. } => "encoding_not_supported",
+            AppError::Git(_) => "git",
+            AppError::NotGitRepository(_) => "not_git_repository",
         }
     }
 }

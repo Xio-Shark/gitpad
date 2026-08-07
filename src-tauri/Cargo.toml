@@ -27,4 +27,5 @@ tauri-plugin-dialog = "2.7.2"
 tauri-plugin-log = "2.9.0"
 log = "0.4.33"
 thiserror = "2.0.19"
+git2 = "0.19"
 

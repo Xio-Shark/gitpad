@@ -1,6 +1,6 @@
 /** 文件类型分类：格式分发（M6 插件扩展点） */
 
-export type RendererKind = 'text' | 'image' | 'csv' | 'pdf' | 'unknown';
+export type RendererKind = 'text' | 'image' | 'csv' | 'pdf' | 'gitdiff' | 'unknown';
 
 const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'bmp', 'avif']);
 

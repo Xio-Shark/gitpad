@@ -20,6 +20,8 @@ export interface Tab {
   dirty: boolean;
   /** 文本内容缓存（dirty 对照与保存源） */
   content: string | null;
+  /** git diff 预览所属工作区 */
+  workspace?: string;
 }
 
 export const workspace = $state<{ rootPath: string | null; root: TreeNode | null }>({
@@ -36,9 +38,9 @@ export function activeTab(): Tab | null {
   return tabs.list.find((t) => t.id === tabs.activeId) ?? null;
 }
 
-/** 打开文件到标签页：同路径去重，聚焦已有 */
+/** 打开文件到标签页：同路径去重（跳过 git diff 预览标签），聚焦已有 */
 export function openFile(path: string): Tab {
-  const existing = tabs.list.find((t) => t.path === path);
+  const existing = tabs.list.find((t) => t.path === path && t.kind !== 'gitdiff');
   if (existing) {
     tabs.activeId = existing.id;
     return existing;
@@ -55,6 +57,35 @@ export function openFile(path: string): Tab {
   tabs.list.push(tab);
   tabs.activeId = tab.id;
   return tab;
+}
+
+/** 在工作区打开某个文件的 git diff 预览标签页（同名文件去重） */
+export function openGitDiff(path: string, workspacePath: string): Tab {
+  const existing = tabs.list.find((t) => t.kind === 'gitdiff' && t.path === path && t.workspace === workspacePath);
+  if (existing) {
+    tabs.activeId = existing.id;
+    return existing;
+  }
+  const name = `diff: ${path.split('/').pop() ?? path}`;
+  const tab: Tab = {
+    id: `gitdiff:${workspacePath}:${path}`,
+    path,
+    name,
+    kind: 'gitdiff',
+    dirty: false,
+    content: null,
+    workspace: workspacePath,
+  };
+  tabs.list.push(tab);
+  tabs.activeId = tab.id;
+  return tab;
+}
+
+/** git 变更计数：任何 stage/unstage/commit 操作后自增，供面板自动刷新 */
+export const gitEvents = $state<{ tick: number }>({ tick: 0 });
+
+export function bumpGitTick(): void {
+  gitEvents.tick++;
 }
 
 export function closeTab(id: string): void {

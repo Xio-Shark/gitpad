@@ -12,7 +12,6 @@
   let pageNum = $state(1);
   let scale = $state(1);
   let fitWidth = $state(false);
-  let indexing = $state(false);
   let searchQuery = $state('');
   let matchIdx = $state(0);
   let totalMatches = $state(0);
@@ -108,7 +107,6 @@
       statusMsg = '';
       return;
     }
-    indexing = true;
     statusMsg = '正在索引…';
     searchPromise = (async () => {
       try {
@@ -126,7 +124,6 @@
           await jumpToHit(0);
         }
       } finally {
-        indexing = false;
         searchPromise = null;
       }
     })();

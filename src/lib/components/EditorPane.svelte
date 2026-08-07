@@ -6,6 +6,7 @@
   import ImageRenderer from './Editor/ImageRenderer.svelte';
   import CsvRenderer from './Editor/CsvRenderer.svelte';
   import PdfRenderer from './Editor/PdfRenderer.svelte';
+  import GitDiffRenderer from './Editor/GitDiffRenderer.svelte';
 
   let tab = $derived(activeTab());
 </script>
@@ -28,6 +29,8 @@
         <TextRenderer tab={tab} />
       {:else if tab.kind === 'pdf'}
         <PdfRenderer tab={tab} />
+      {:else if tab.kind === 'gitdiff'}
+        <GitDiffRenderer tab={tab} />
       {:else}
         <div class="placeholder">
           <div class="placeholder-title">不支持的格式</div>

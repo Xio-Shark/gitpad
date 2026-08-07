@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['build/', 'node_modules/', '.svelte-kit/', 'src-tauri/', '.opencode/', '.trellis/', '.lwc/'] },
+  { ignores: ['build/', 'node_modules/', '.svelte-kit/', 'src-tauri/', '.opencode/', '.trellis/', '.lwc/', 'static/pdfjs/'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...svelte.configs['flat/recommended'],

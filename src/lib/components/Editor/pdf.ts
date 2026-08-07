@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
 import type { TextContent, TextItem } from 'pdfjs-dist/types/src/display/api';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdfjs/pdf.worker.min.mjs';
@@ -63,7 +63,7 @@ export class PdfDocument {
     textLayerDiv.style.width = `${viewport.width / dpr}px`;
     textLayerDiv.style.height = `${viewport.height / dpr}px`;
 
-    const ctx = canvas.getContext('2d', { alpha: false })!;
+    
     let cancelled = false;
     const renderTask = page.render({ canvas, viewport });
 
@@ -81,7 +81,7 @@ export class PdfDocument {
           container: textLayerDiv,
           viewport,
         }).render();
-      } catch (e) {
+      } catch {
         // 文本层失败不影响页面渲染
       }
     }

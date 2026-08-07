@@ -59,7 +59,7 @@ export function createTextEditorView(
       }),
       EditorView.theme({
         '&': { height: '100%', fontSize: '13px' },
-        '.cm-scroller': { fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" },
+        '.cm-scroller': { fontFamily: "var(--font-mono)" },
         '&.cm-focused': { outline: 'none' },
       }),
     ],
