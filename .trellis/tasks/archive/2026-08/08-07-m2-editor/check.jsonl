@@ -1,4 +1,4 @@
-{"file": ".trellis/tasks/08-07-m2-editor/prd.md", "reason": "验收标准核对源"}
-{"file": ".trellis/tasks/08-07-m2-editor/design.md", "reason": "设计决策核对源（分发/渲染器/阈值）"}
+{"file": ".trellis/tasks/archive/2026-08/08-07-m2-editor/prd.md", "reason": "验收标准核对源"}
+{"file": ".trellis/tasks/archive/2026-08/08-07-m2-editor/design.md", "reason": "设计决策核对源（分发/渲染器/阈值）"}
 {"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Rust 审查标准"}
 {"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端审查标准"}

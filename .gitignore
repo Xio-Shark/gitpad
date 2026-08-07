@@ -5,6 +5,8 @@ node_modules/
 dist/
 dist-ssr/
 *.local
+.svelte-kit/
+build/
 
 # Rust / Tauri
 src-tauri/target/

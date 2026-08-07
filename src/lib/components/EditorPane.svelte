@@ -1,6 +1,8 @@
 <script lang="ts">
   import { activeTab } from '$lib/state.svelte';
+  import { isMarkdown } from '$lib/utils/filetype';
   import TextRenderer from './Editor/TextRenderer.svelte';
+  import MarkdownRenderer from './Editor/MarkdownRenderer.svelte';
   import ImageRenderer from './Editor/ImageRenderer.svelte';
   import CsvRenderer from './Editor/CsvRenderer.svelte';
 
@@ -19,6 +21,8 @@
         <ImageRenderer tab={tab} />
       {:else if tab.kind === 'csv'}
         <CsvRenderer tab={tab} />
+      {:else if tab.kind === 'text' && isMarkdown(tab.path)}
+        <MarkdownRenderer tab={tab} />
       {:else if tab.kind === 'text'}
         <TextRenderer tab={tab} />
       {:else if tab.kind === 'pdf'}

@@ -13,6 +13,7 @@
   let scrollEl = $state<HTMLDivElement | null>(null);
   let scrollTop = $state(0);
   let viewportHeight = $state(600);
+  let refreshError = $state<string | null>(null);
 
   const ROW_HEIGHT = 24;
 
@@ -42,6 +43,15 @@
     settings[key] = !settings[key];
     await reloadRoot();
   }
+
+  async function refresh() {
+    refreshError = null;
+    try {
+      await reloadRoot();
+    } catch (e) {
+      refreshError = typeof e === 'string' ? e : String(e);
+    }
+  }
 </script>
 
 <div class="filetree">
@@ -58,8 +68,12 @@
         title="显示 node_modules"
         onclick={() => toggleSettings('showNodeModules')}
       >nm</button>
+      <button title="刷新文件树" onclick={() => void refresh()}>↻</button>
     </span>
   </div>
+  {#if refreshError}
+    <div class="refresh-error">{refreshError}</div>
+  {/if}
   <div
     class="tree-scroll"
     bind:this={scrollEl}
@@ -144,6 +158,13 @@
     flex: 1;
     overflow-y: auto;
     position: relative;
+  }
+  .refresh-error {
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--danger);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
   }
   .tree-row {
     position: absolute;

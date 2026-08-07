@@ -22,3 +22,9 @@ export function classify(path: string): RendererKind {
   if (TEXT_EXTS.has(ext)) return 'text';
   return 'unknown';
 }
+
+/** 是否走 Markdown 并排预览渲染器 */
+export function isMarkdown(path: string): boolean {
+  const ext = path.split('.').pop()?.toLowerCase() ?? '';
+  return ext === 'md' || ext === 'markdown';
+}
