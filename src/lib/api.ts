@@ -44,3 +44,43 @@ export async function fsReadFile(path: string, maxSize?: number): Promise<string
 export async function fsWriteFile(path: string, content: string): Promise<void> {
   return invoke<void>('fs_write_file', { params: { path, content } });
 }
+
+export interface WalkFile {
+  path: string;
+  name: string;
+}
+
+export interface WalkResult {
+  files: WalkFile[];
+  truncated: boolean;
+}
+
+export async function fsWalk(
+  root: string,
+  opts: { showHidden: boolean; showNodeModules: boolean; limit?: number }
+): Promise<WalkResult> {
+  return invoke<WalkResult>('fs_walk', {
+    params: {
+      root,
+      limit: opts.limit ?? 20000,
+      show_hidden: opts.showHidden,
+      show_node_modules: opts.showNodeModules,
+    },
+  });
+}
+
+export async function fsCreateFile(path: string): Promise<void> {
+  return invoke<void>('fs_create_file', { params: { path } });
+}
+
+export async function fsCreateDir(path: string): Promise<void> {
+  return invoke<void>('fs_create_dir', { params: { path } });
+}
+
+export async function fsRename(oldPath: string, newPath: string): Promise<void> {
+  return invoke<void>('fs_rename', { params: { old_path: oldPath, new_path: newPath } });
+}
+
+export async function fsDelete(path: string, recursive: boolean): Promise<void> {
+  return invoke<void>('fs_delete', { params: { path, recursive } });
+}

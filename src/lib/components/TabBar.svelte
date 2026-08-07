@@ -28,6 +28,12 @@
       tabindex="0"
       title={tab.path}
       onclick={() => (tabs.activeId = tab.id)}
+      onauxclick={(e) => {
+        if (e.button === 1) {
+          e.preventDefault();
+          confirmClose(tab.id, tab.dirty);
+        }
+      }}
       onkeydown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();

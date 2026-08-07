@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use ignore::WalkBuilder;
-
 use crate::error::AppError;
 
 /// 单个目录条目（过滤后的可见子项）
@@ -252,5 +251,157 @@ mod tests {
             elapsed.as_millis() < 500,
             "500 项列出耗时 {elapsed:?}，超过 500ms"
         );
+    }
+}
+
+/// 递归列出 `root` 下所有可见文件（相对路径），应用与 `list` 相同的过滤规则。
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct WalkFile {
+    pub path: String,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct WalkResult {
+    pub files: Vec<WalkFile>,
+    pub truncated: bool,
+}
+
+pub fn walk(root: &Path, options: &ListOptions, limit: usize) -> Result<WalkResult, AppError> {
+    if !root.exists() {
+        return Err(AppError::NotFound(root.display().to_string()));
+    }
+    if !root.is_dir() {
+        return Err(AppError::NotDirectory(root.display().to_string()));
+    }
+    let show_hidden = options.show_hidden;
+    let show_node_modules = options.show_node_modules;
+
+    let mut builder = WalkBuilder::new(root);
+    builder
+        .follow_links(false)
+        .hidden(false)
+        .parents(true)
+        .ignore(true)
+        .git_ignore(true)
+        .git_global(true)
+        .git_exclude(true)
+        .require_git(false)
+        // 遍历时拦截：不进入被过滤的目录（node_modules/隐藏目录）
+        .filter_entry(move |entry| {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if name == ".git" {
+                return false;
+            }
+            if !show_hidden && name.starts_with('.') && name != ".gitignore" {
+                return false;
+            }
+            if !show_node_modules && name == "node_modules" {
+                return false;
+            }
+            true
+        });
+
+    let mut files = Vec::new();
+    let mut truncated = false;
+    for result in builder.build() {
+        let entry = match result {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        if entry.depth() == 0 {
+            continue;
+        }
+        let path = entry.path();
+        let name = path
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        if name == ".git" {
+            continue;
+        }
+        if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+            continue;
+        }
+        if files.len() >= limit {
+            truncated = true;
+            break;
+        }
+        files.push(WalkFile {
+            path: path.to_string_lossy().into_owned(),
+            name,
+        });
+    }
+    Ok(WalkResult { files, truncated })
+}
+
+#[cfg(test)]
+mod walk_tests {
+    use super::*;
+    use std::fs;
+
+    #[test]
+    fn walk_collects_files_and_respects_filters() {
+        let root =
+            std::env::temp_dir().join(format!("gitpad-walk-test-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(root.join("sub")).unwrap();
+        fs::write(root.join("a.txt"), "a").unwrap();
+        fs::write(root.join("sub/b.txt"), "b").unwrap();
+        fs::write(root.join("sub/.hidden"), "h").unwrap();
+        fs::create_dir_all(root.join("node_modules/pkg")).unwrap();
+        fs::write(root.join("node_modules/pkg/index.js"), "x").unwrap();
+
+        let res = walk(
+            &root,
+            &ListOptions::default(),
+            100,
+        )
+        .unwrap();
+        assert!(!res.truncated);
+        let rel: Vec<String> = res
+            .files
+            .iter()
+            .map(|f| f.path.strip_prefix(root.to_str().unwrap()).unwrap().to_string())
+            .collect();
+        assert!(rel.contains(&"/a.txt".to_string()));
+        assert!(rel.contains(&"/sub/b.txt".to_string()));
+        assert!(!rel.iter().any(|p| p.contains(".hidden")), "隐藏文件应被过滤: {rel:?}");
+        assert!(!rel.iter().any(|p| p.contains("node_modules")), "node_modules 应被过滤: {rel:?}");
+
+        // 打开开关后可见
+        let res = walk(
+            &root,
+            &ListOptions {
+                show_hidden: true,
+                show_node_modules: true,
+            },
+            100,
+        )
+        .unwrap();
+        let rel: Vec<String> = res
+            .files
+            .iter()
+            .map(|f| f.path.strip_prefix(root.to_str().unwrap()).unwrap().to_string())
+            .collect();
+        assert!(rel.iter().any(|p| p.contains(".hidden")));
+        assert!(rel.iter().any(|p| p.contains("node_modules")));
+
+        // limit 截断
+        let res = walk(&root, &ListOptions::default(), 1).unwrap();
+        assert!(res.truncated);
+        assert_eq!(res.files.len(), 1);
+
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn walk_nonexistent_dir_errors() {
+        let res = walk(
+            Path::new("/nonexistent-gitpad-dir"),
+            &ListOptions::default(),
+            100,
+        );
+        assert!(res.is_err());
     }
 }

@@ -7,9 +7,11 @@
   import GitPanel from '$lib/components/GitPanel.svelte';
   import WelcomeView from '$lib/components/WelcomeView.svelte';
   import TabBar from '$lib/components/TabBar.svelte';
+  import QuickOpen from '$lib/components/QuickOpen.svelte';
   import { openWorkspace, workspace, openFile } from '$lib/state.svelte';
 
   let loadError = $state<string | null>(null);
+  let quickOpenOpen = $state(false);
 
   let workspacePath = $derived(page.url.searchParams.get('path'));
 
@@ -19,6 +21,12 @@
         loadError = typeof e === 'string' ? e : JSON.stringify(e);
       });
     }
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p' && !e.shiftKey) {
+        e.preventDefault();
+        quickOpenOpen = !quickOpenOpen;
+      }
+    });
   });
 </script>
 
@@ -37,6 +45,7 @@
     </main>
     <aside class="git"><GitPanel /></aside>
   </div>
+  <QuickOpen open={quickOpenOpen} onClose={() => (quickOpenOpen = false)} />
 {:else}
   <WelcomeView />
 {/if}

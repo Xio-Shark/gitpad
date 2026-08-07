@@ -1,4 +1,4 @@
-import { fsListDir, type DirEntry } from './api';
+import { fsListDir, fsWalk, type DirEntry, type WalkFile } from './api';
 import { settings } from './settings.svelte';
 import { classify, type RendererKind } from './utils/filetype';
 
@@ -111,6 +111,40 @@ export const gitEvents = $state<{ tick: number }>({ tick: 0 });
 
 export function bumpGitTick(): void {
   gitEvents.tick++;
+}
+
+/** 快速打开文件缓存：打开工作区时惰性构建，树结构变化后失效重建 */
+export const quickOpen = $state<{ files: WalkFile[] | null; truncated: boolean; stale: boolean }>({
+  files: null,
+  truncated: false,
+  stale: true,
+});
+
+export function invalidateQuickOpen(): void {
+  quickOpen.files = null;
+  quickOpen.stale = true;
+}
+
+export async function ensureQuickOpen(): Promise<void> {
+  if (!workspace.rootPath) return;
+  if (quickOpen.files && !quickOpen.stale) return;
+  const res = await fsWalk(workspace.rootPath, settings);
+  quickOpen.files = res.files;
+  quickOpen.truncated = res.truncated;
+  quickOpen.stale = false;
+}
+
+/** 重新加载目录的子条目（树局部刷新）；无对应节点时重载整树 */
+export async function refreshNode(path: string): Promise<void> {
+  const target = workspace.root ? findNode(workspace.root, path) : null;
+  if (!target || !target.isDir) {
+    await reloadRoot();
+    return;
+  }
+  const entries = await fsListDir(target.path, settings);
+  target.children = entries.map(toNode);
+  target.loaded = true;
+  target.expanded = true;
 }
 
 export function closeTab(id: string): void {

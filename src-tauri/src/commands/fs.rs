@@ -44,3 +44,79 @@ pub struct WriteFileParams {
 pub fn fs_write_file(params: WriteFileParams) -> Result<(), AppError> {
     text::write_text(&params.path, &params.content)
 }
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct WalkParams {
+    pub root: PathBuf,
+    #[serde(default = "default_walk_limit")]
+    pub limit: usize,
+    #[serde(default)]
+    pub show_hidden: bool,
+    #[serde(default)]
+    pub show_node_modules: bool,
+}
+
+fn default_walk_limit() -> usize {
+    20000
+}
+
+#[tauri::command]
+pub fn fs_walk(params: WalkParams) -> Result<tree::WalkResult, AppError> {
+    let options = tree::ListOptions {
+        show_hidden: params.show_hidden,
+        show_node_modules: params.show_node_modules,
+    };
+    tree::walk(&params.root, &options, params.limit)
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct MutateParams {
+    pub path: PathBuf,
+    #[serde(default)]
+    pub recursive: bool,
+}
+
+#[tauri::command]
+pub fn fs_create_file(params: MutateParams) -> Result<(), AppError> {
+    text::write_text(&params.path, "")
+}
+
+#[tauri::command]
+pub fn fs_create_dir(params: MutateParams) -> Result<(), AppError> {
+    std::fs::create_dir(&params.path)?;
+    Ok(())
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct RenameParams {
+    pub old_path: PathBuf,
+    pub new_path: PathBuf,
+}
+
+#[tauri::command]
+pub fn fs_rename(params: RenameParams) -> Result<(), AppError> {
+    // 防止把目录移动到自身内部
+    if params.new_path.starts_with(&params.old_path) {
+        return Err(AppError::Io(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "不能移动到自身内部",
+        )));
+    }
+    std::fs::rename(&params.old_path, &params.new_path)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn fs_delete(params: MutateParams) -> Result<(), AppError> {
+    let meta = std::fs::metadata(&params.path)?;
+    if meta.is_dir() {
+        if !params.recursive {
+            std::fs::remove_dir(&params.path)?;
+        } else {
+            std::fs::remove_dir_all(&params.path)?;
+        }
+    } else {
+        std::fs::remove_file(&params.path)?;
+    }
+    Ok(())
+}

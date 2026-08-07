@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { TreeNode } from '$lib/state.svelte';
-  import { toggleNode } from '$lib/state.svelte';
+  import { toggleNode, refreshNode, invalidateQuickOpen, openFile } from '$lib/state.svelte';
   import { settings } from '$lib/settings.svelte';
   import { reloadRoot } from '$lib/state.svelte';
+  import { fsCreateFile, fsCreateDir, fsRename, fsDelete, isAppError } from '$lib/api';
   import { visibleRange } from '$lib/utils/windowing';
+  import InputDialog from './InputDialog.svelte';
 
   let props = $props<{
     root: TreeNode | null;
@@ -41,6 +43,7 @@
 
   async function toggleSettings(key: 'showHidden' | 'showNodeModules') {
     settings[key] = !settings[key];
+    invalidateQuickOpen();
     await reloadRoot();
   }
 
@@ -50,6 +53,86 @@
       await reloadRoot();
     } catch (e) {
       refreshError = typeof e === 'string' ? e : String(e);
+    }
+  }
+
+  // ---- 右键菜单 ----
+  type MenuState = { x: number; y: number; node: TreeNode } | null;
+  let menu = $state<MenuState>(null);
+  let dialog = $state<{
+    title: string;
+    initial: string;
+    mode: 'newFile' | 'newDir' | 'rename';
+    node: TreeNode | null;
+  } | null>(null);
+
+  function parentDir(path: string): string {
+    const i = path.lastIndexOf('/');
+    return i <= 0 ? path : path.slice(0, i);
+  }
+
+  function showMenu(e: MouseEvent, node: TreeNode) {
+    e.preventDefault();
+    menu = { x: e.clientX, y: e.clientY, node };
+  }
+
+  function hideMenu() {
+    menu = null;
+  }
+
+  function targetDir(node: TreeNode): string {
+    return node.isDir ? node.path : parentDir(node.path);
+  }
+
+  function openDialog(mode: 'newFile' | 'newDir' | 'rename', node: TreeNode) {
+    dialog = {
+      mode,
+      title: mode === 'newFile' ? '新建文件' : mode === 'newDir' ? '新建文件夹' : '重命名',
+      initial: mode === 'rename' ? node.name : '',
+      node,
+    };
+    hideMenu();
+  }
+
+  async function runDialog(value: string) {
+    if (!dialog) return;
+    const d = dialog;
+    dialog = null;
+    refreshError = null;
+    try {
+      if (d.mode === 'rename' && d.node) {
+        const dir = parentDir(d.node.path);
+        await fsRename(d.node.path, `${dir}/${value}`);
+        await refreshNode(dir);
+      } else if (d.mode === 'newDir' && d.node) {
+        const dir = targetDir(d.node);
+        await fsCreateDir(`${dir}/${value}`);
+        await refreshNode(dir);
+        if (d.node.isDir) d.node.expanded = true;
+      } else if (d.node) {
+        const dir = targetDir(d.node);
+        const target = `${dir}/${value}`;
+        await fsCreateFile(target);
+        openFile(target);
+        await refreshNode(dir);
+      }
+      invalidateQuickOpen();
+    } catch (e) {
+      refreshError = isAppError(e) ? e.message : String(e);
+    }
+  }
+
+  async function removeNode(node: TreeNode) {
+    hideMenu();
+    const msg = node.isDir ? `确定删除 ${node.name} 及其全部内容？` : `确定删除 ${node.name}？`;
+    if (!confirm(msg)) return;
+    refreshError = null;
+    try {
+      await fsDelete(node.path, node.isDir);
+      invalidateQuickOpen();
+      await refreshNode(parentDir(node.path));
+    } catch (e) {
+      refreshError = isAppError(e) ? e.message : String(e);
     }
   }
 </script>
@@ -76,10 +159,13 @@
   {/if}
   <div
     class="tree-scroll"
+    role="tree"
+    tabindex="0"
     bind:this={scrollEl}
     onscroll={(e) => {
       scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
     }}
+    oncontextmenu={(e) => e.preventDefault()}
     bind:clientHeight={viewportHeight}
   >
     <div style="height: {range.totalHeight}px; position: relative;">
@@ -92,6 +178,7 @@
           aria-label={row.node.name}
           aria-selected="false"
           tabindex="-1"
+          oncontextmenu={(e) => showMenu(e, row.node)}
           onkeydown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
@@ -111,6 +198,27 @@
       {/each}
     </div>
   </div>
+  {#if menu}
+    <div class="ctx-mask" role="presentation" onclick={() => hideMenu()} oncontextmenu={(e) => { e.preventDefault(); hideMenu(); }}></div>
+    <div class="ctx-menu" style="left: {menu.x}px; top: {menu.y}px;">
+      <button onclick={() => openDialog('newFile', menu!.node)}>新建文件</button>
+      {#if menu!.node.isDir}
+        <button onclick={() => openDialog('newDir', menu!.node)}>新建文件夹</button>
+      {/if}
+      <button onclick={() => openDialog('rename', menu!.node)}>重命名</button>
+      <div class="ctx-sep"></div>
+      <button class="danger" onclick={() => removeNode(menu!.node)}>删除</button>
+    </div>
+  {/if}
+  {#if dialog}
+    <InputDialog
+      title={dialog.title}
+      initial={dialog.initial}
+      placeholder={dialog.mode === 'newDir' ? '文件夹名' : '文件名'}
+      onOk={(v) => void runDialog(v)}
+      onCancel={() => (dialog = null)}
+    />
+  {/if}
 </div>
 
 <style>
@@ -198,5 +306,43 @@
   .name.symlink {
     font-style: italic;
     color: var(--text-secondary);
+  }
+  .ctx-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+  }
+  .ctx-menu {
+    position: fixed;
+    z-index: 91;
+    min-width: 130px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+  }
+  .ctx-menu button {
+    text-align: left;
+    font-size: 12px;
+    padding: 5px 10px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .ctx-menu button:hover {
+    background: var(--hover);
+  }
+  .ctx-menu button.danger {
+    color: var(--danger);
+  }
+  .ctx-sep {
+    height: 1px;
+    background: var(--border);
+    margin: 3px 4px;
   }
 </style>
