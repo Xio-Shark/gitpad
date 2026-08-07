@@ -80,6 +80,12 @@
     }
   }
 
+  // 挂载即加载；切回该标签页或工作区变化时也刷新
+  $effect(() => {
+    void props.workspace;
+    void load();
+  });
+
   async function openCommit(c: CommitInfo) {
     selected = c;
     openCommitDiff(props.workspace, c.oid, c.message || c.short);

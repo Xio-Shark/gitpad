@@ -83,3 +83,19 @@ pub fn history(repo: &Repository, limit: usize) -> Result<HistoryData, AppError>
 
     Ok(HistoryData { refs, commits })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn history_on_test_workspace() {
+        let repo = Repository::open("/Users/tengyanxi/gitpad-test-workspace").unwrap();
+        let h = history(&repo, 100).unwrap();
+        assert!(!h.commits.is_empty());
+        eprintln!("commits={} refs={:?}", h.commits.len(), h.refs);
+        for c in &h.commits {
+            eprintln!("{} {} parents={:?}", c.short, c.message, c.parents);
+        }
+    }
+}
