@@ -95,7 +95,7 @@
     max-width: 200px;
     border-right: 1px solid var(--border);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-secondary);
     user-select: none;
     flex-shrink: 0;

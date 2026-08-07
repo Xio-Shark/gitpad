@@ -58,7 +58,7 @@ export function createTextEditorView(
         }
       }),
       EditorView.theme({
-        '&': { height: '100%', fontSize: '13px' },
+        '&': { height: '100%', fontSize: '14px' },
         '.cm-scroller': { fontFamily: "var(--font-mono)" },
         '&.cm-focused': { outline: 'none' },
       }),

@@ -105,7 +105,7 @@
     flex-shrink: 0;
   }
   .branch {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;

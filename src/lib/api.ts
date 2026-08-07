@@ -84,3 +84,8 @@ export async function fsRename(oldPath: string, newPath: string): Promise<void> 
 export async function fsDelete(path: string, recursive: boolean): Promise<void> {
   return invoke<void>('fs_delete', { params: { path, recursive } });
 }
+
+/** 复制文本到系统剪贴板（原生实现，WKWebView 的 navigator.clipboard 在 Tauri 下不可靠） */
+export async function clipboardCopy(text: string): Promise<void> {
+  return invoke<void>('clipboard_copy', { text });
+}

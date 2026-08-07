@@ -204,7 +204,7 @@
   }
   .commit-msg {
     display: block;
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text);
     overflow: hidden;

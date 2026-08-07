@@ -4,7 +4,7 @@
   import { toggleNode, refreshNode, invalidateQuickOpen, openFile } from '$lib/state.svelte';
   import { settings } from '$lib/settings.svelte';
   import { reloadRoot } from '$lib/state.svelte';
-  import { fsCreateFile, fsCreateDir, fsRename, fsDelete, isAppError } from '$lib/api';
+  import { fsCreateFile, fsCreateDir, fsRename, fsDelete, clipboardCopy, isAppError } from '$lib/api';
   import { visibleRange } from '$lib/utils/windowing';
   import InputDialog from './InputDialog.svelte';
 
@@ -28,7 +28,8 @@
       if (e.metaKey && e.altKey && e.key.toLowerCase() === 'c') {
         const target = selectedPath ?? props.root?.path;
         if (!target) return;
-        void navigator.clipboard.writeText(target).then(() => {
+        e.preventDefault();
+        void clipboardCopy(target).then(() => {
           copiedTip = `已复制路径：${target}`;
           setTimeout(() => (copiedTip = null), 2500);
         });
@@ -340,7 +341,7 @@
     color: var(--text);
   }
   .name {
-    font-size: 13px;
+    font-size: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
