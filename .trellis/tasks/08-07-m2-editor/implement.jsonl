@@ -1,1 +1,8 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/frontend/runes-guidelines.md", "reason": "CM6 实例生命周期与 $effect cleanup 约定"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "后端唯一真相源、标签页状态单例"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "api.ts 类型契约与 Tab 类型"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "渲染器组件目录落位"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "AppError::FileTooLarge 与错误传播"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "fs_read_file/fs_write_file 命令与领域层落位"}
+{"file": ".trellis/tasks/08-07-mvp/prd.md", "reason": "父任务文件格式支持需求"}
+{"file": ".trellis/tasks/08-07-m1-skeleton/design.md", "reason": "M1 布局与 EditorPane 占位的接入点"}

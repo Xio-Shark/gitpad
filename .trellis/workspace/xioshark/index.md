@@ -1,4 +1,4 @@
-# Workspace Index - tengyanxi
+# Workspace Index - xioshark
 
 > Journal tracking for AI development sessions.
 

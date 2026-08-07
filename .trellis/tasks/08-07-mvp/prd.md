@@ -27,10 +27,23 @@
 4. PDF 在标签页内渲染（搜索/缩放工具栏按钮）
 5. Git 面板：历史 + 分支图 + 工作区 diff + hunk stage + commit + push/pull
 
+### 文件格式支持（grill 会话 2026-08-07 确认）
+
+**分层**：
+- 文本类（代码/md/csv/json/log/yaml…）→ 文本渲染器（CM6 编辑 + 保存），语言高亮按扩展名映射懒加载，未映射走纯文本
+- 图片类 → 标签页 `<img>` 渲染（只读）：png/jpg/jpeg/gif/svg/webp/ico/bmp/avif；svg 一律用 `<img>` 加载（不执行脚本）
+- PDF → pdf.js 标签页渲染
+- CSV → 双模式：文本编辑 + 一键切换只读表格视图（解析器处理引号内逗号/转义，表格虚拟滚动）
+- 其他二进制 → 拒绝打开并提示"不支持"
+
+**大文件阈值**（Rust 侧常量，集中配置）：
+- 文本/代码 > 10MB → 拒绝打开，提示用外部工具
+- CSV 表格视图 > 20MB → 降级为纯文本只读
+
 ## Task Map
 
 - M1 (m1-skeleton)：Tauri 骨架 + 拖入文件夹 → 文件树（虚拟化 + 忽略规则）
-- M2 (m2-editor)：CodeMirror 6 打开/编辑/保存
+- M2 (m2-editor)：文件打开域——文本编辑（CM6 + 语言映射）+ 多标签页 + 图片渲染 + CSV 双模式 + 二进制拒绝 + 大文件阈值
 - M3 (m3-markdown)：Markdown 并排预览
 - M4 (m4-pdf)：PDF 标签页预览
 - M5 (m5-git)：Git 面板（gitgraph + history + diff + hunk stage + commit + push/pull）
@@ -41,7 +54,10 @@
 ## Acceptance Criteria
 
 - [ ] 拖入文件夹能打开文件树，过滤规则生效（.git/.gitignore 隐藏、node_modules 开关）
-- [ ] 文本文件可编辑保存，多标签页切换
+- [ ] 文本文件可编辑保存，多标签页切换；常见代码格式有语法高亮（js/ts/json/rs/py 等）
+- [ ] 图片（png/jpg/gif/svg 等）标签页内渲染；二进制文件拒绝打开并提示
+- [ ] CSV 可在表格视图与文本编辑间切换
+- [ ] 超过阈值的大文件被拒绝/降级，不卡死
 - [ ] md 文件并排实时预览渲染正确（KaTeX/mermaid/代码高亮）
 - [ ] PDF 标签页内渲染、缩放、搜索
 - [ ] Git 面板可用：历史、分支图、diff、hunk stage、commit、push/pull
