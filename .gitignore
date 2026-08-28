@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+.svelte-kit/
+build/
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+.claude/
+.cursor/
+
+# Logs
+*.log
+
+# Trellis 本地开发规范（不上传公开仓库）
+.trellis/
+.opencode/
+.lwc/
+docs/
+AGENTS.md
+CONTEXT.md
